@@ -77,7 +77,8 @@
         }
 
         function destroy (model, options) {
-
+            burry.remove(model.id);
+            return wrapped('update', model, options).promise();
         }
 
         return function (method, model, options) {

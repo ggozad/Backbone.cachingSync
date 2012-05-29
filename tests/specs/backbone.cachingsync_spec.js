@@ -121,6 +121,24 @@
         });
 
 
+        it('caches a destroy on a model', function () {
+            model = new Model({foo: 'bar'});
+            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+                return $.Deferred()
+                    .resolve(new Model({id: 1, foo: 'bar'}))
+                    .promise();
+            });
+            model.save();
+            ajax.andCallFake(function (req) {
+                return $.Deferred()
+                    .resolve(new Model({id: 1, foo: 'bar', bar: 'foo'}))
+                    .promise();
+            });
+            model.destroy();
+            expect(burry.get('1')).toBeUndefined();
+        });
+
+
 
     });
 
