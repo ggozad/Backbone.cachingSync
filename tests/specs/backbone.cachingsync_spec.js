@@ -65,7 +65,17 @@
             expect(collection.models[1].attributes).toEqual({id: 2, bar: 'foo'});
             expect(burry.get('__ids__')).toEqual([1, 2]);
 
-       });
+            // Now that we have a cache, let's create a new collection with the same ns and also make ajax fail
+            var collection2 = new Collection();
+            ajax.andCallFake(function () {
+                return $.Deferred().reject();
+            });
+            p = collection2.fetch();
+            expect(p.isResolved()).toBeTruthy();
+            expect(ajax).toHaveBeenCalled();
+            expect(collection.models[0].attributes).toEqual({id: 1, foo: 'bar'});
+            expect(collection.models[1].attributes).toEqual({id: 2, bar: 'foo'});
+        });
 
     });
 

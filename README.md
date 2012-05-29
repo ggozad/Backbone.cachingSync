@@ -1,7 +1,9 @@
 # Backbone Caching Sync
 
-WORK IN PROGRESS!
+An extension to Backbone providing localStorage caching for Backbone sync operations
 
+## Introduction
+WORK IN PROGRESS!
 
 ## License
 

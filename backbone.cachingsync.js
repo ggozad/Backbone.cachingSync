@@ -47,7 +47,9 @@
             });
 
             if (typeof ids !== 'undefined') {
-                d.resolve(_.map(ids, function (id) { burry.get(id); }));
+                d.resolve(_.map(ids, function (id) {
+                    return new collection.model(burry.get(id));
+                }));
             } else {
                 wp.done(d.resolve).fail(d.reject);
             }
