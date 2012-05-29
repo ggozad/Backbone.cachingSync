@@ -73,8 +73,8 @@
             p = collection2.fetch();
             expect(p.isResolved()).toBeTruthy();
             expect(ajax).toHaveBeenCalled();
-            expect(collection.models[0].attributes).toEqual({id: 1, foo: 'bar'});
-            expect(collection.models[1].attributes).toEqual({id: 2, bar: 'foo'});
+            expect(collection2.models[0].attributes).toEqual({id: 1, foo: 'bar'});
+            expect(collection2.models[1].attributes).toEqual({id: 2, bar: 'foo'});
         });
 
         it('caches a create on a model', function () {

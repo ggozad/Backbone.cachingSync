@@ -48,7 +48,9 @@
 
             if (typeof ids !== 'undefined') {
                 d.resolve(_.map(ids, function (id) {
-                    return new collection.model(burry.get(id));
+                    json = burry.get(id);
+                    json.id = id;
+                    return json;
                 }));
             } else {
                 wp.done(d.resolve).fail(d.reject);
