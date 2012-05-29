@@ -81,7 +81,7 @@
             model = new Model({foo: 'bar'});
             ajax = spyOn($, 'ajax').andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve({id: 1})
+                    .resolve(new Model({id: 1, foo: 'bar'}))
                     .promise();
             });
             model.save();
@@ -90,16 +90,16 @@
         });
 
         it('caches a create on a collection', function () {
-            collection = new Collection();
+            collection = new Collection([{id: 1, bar: 'foo'}, {foo: 'bar'}]);
             ajax = spyOn($, 'ajax').andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve({id: 1})
+                    .resolve(new Model({id: 2, foobar: 'barfoo'}))
                     .promise();
             });
-            collection.create({foo: 'bar'});
-            expect(collection.models[0].id).toEqual(1);
-            expect(burry.get('1')).toEqual({id: 1, foo: 'bar'});
-            expect(burry.get('__ids__')).toEqual([1]);
+            collection.create({foobar: 'barfoo'});
+            expect(collection.models[2].id).toEqual(2);
+            expect(burry.get('2')).toEqual({id: 2, foobar: 'barfoo'});
+            expect(burry.get('__ids__')).toEqual([1, 2]);
         });
 
     });

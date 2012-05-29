@@ -16,8 +16,7 @@
                 updated = {},
                 wp;
 
-            wp = wrapped('read', model, options);
-            wp.done(function (attrs) {
+            wp = wrapped('read', model, options).done(function (attrs) {
                 model.set(attrs);
                 burry.set(model.id, model.toJSON());
             });
@@ -39,8 +38,7 @@
                 d = $.Deferred(),
                 wp;
 
-            wp = wrapped('read', collection, options);
-            wp.done(function (models) {
+            wp = wrapped('read', collection, options).done(function (models) {
                 _.each(models, function (model) { burry.set(model.id, model); });
                 burry.set('__ids__', _.pluck(models, 'id'));
                 collection.reset(models);
@@ -61,11 +59,14 @@
 
         function create (model, options) {
             var wp = wrapped('create', model, options)
-                .done(function (attrs) {
-                    model.set(attrs);
-                    burry.set(model.id, model.attributes);
+                .done(function (newmodel) {
+                    burry.set(newmodel.id, newmodel.attributes);
                     if (model.collection)
-                        burry.set('__ids__', _.pluck(model.collection.models, 'id'));
+                        burry.set('__ids__', _(model.collection.models).chain()
+                            .pluck('id')
+                            .union([newmodel.id])
+                            .without(undefined).value());
+
                 });
             return wp.promise();
         }
