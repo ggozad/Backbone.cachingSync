@@ -58,11 +58,17 @@
         }
 
         function create (model, options) {
-
+            var wp = wrapped('create', model, options)
+                .done(function (attrs) {
+                    model.set(attrs);
+                    burry.set(model.id, model.attributes);
+                    if (model.collection)
+                        burry.set('__ids__', _.pluck(model.collection.models, 'id'));
+                });
+            return wp.promise();
         }
 
         function update (model, options) {
-
         }
 
         function destroy (model, options) {
@@ -75,9 +81,9 @@
             options = options || {};
             switch (method) {
                 case 'read': p = typeof model.id !== 'undefined' ? getItem(model, options) : getItems(model, options); break;
-                case 'create':  p = create(model); break;
-                case 'update':  p = update(model); break;
-                case 'delete':  p = destroy(model); break;
+                case 'create':  p = create(model, options); break;
+                case 'update':  p = update(model, options); break;
+                case 'delete':  p = destroy(model, options); break;
             }
 
             // Fallback for old-style callbacks.

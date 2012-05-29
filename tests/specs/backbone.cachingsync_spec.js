@@ -77,6 +77,31 @@
             expect(collection.models[1].attributes).toEqual({id: 2, bar: 'foo'});
         });
 
+        it('caches a create on a model', function () {
+            model = new Model({foo: 'bar'});
+            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+                return $.Deferred()
+                    .resolve({id: 1})
+                    .promise();
+            });
+            model.save();
+            expect(model.id).toEqual(1);
+            expect(burry.get('1')).toEqual({id: 1, foo: 'bar'});
+        });
+
+        it('caches a create on a collection', function () {
+            collection = new Collection();
+            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+                return $.Deferred()
+                    .resolve({id: 1})
+                    .promise();
+            });
+            collection.create({foo: 'bar'});
+            expect(collection.models[0].id).toEqual(1);
+            expect(burry.get('1')).toEqual({id: 1, foo: 'bar'});
+            expect(burry.get('__ids__')).toEqual([1]);
+        });
+
     });
 
 })(this.jQuery, this.Backbone, this.Burry);
