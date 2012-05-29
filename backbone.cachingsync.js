@@ -72,6 +72,8 @@
         }
 
         function update (model, options) {
+            burry.set(model.id, model.attributes);
+            return wrapped('update', model, options).promise();
         }
 
         function destroy (model, options) {

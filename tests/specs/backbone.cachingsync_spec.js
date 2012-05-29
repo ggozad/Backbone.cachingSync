@@ -102,6 +102,26 @@
             expect(burry.get('__ids__')).toEqual([1, 2]);
         });
 
+        it('caches an update on a model', function () {
+            model = new Model({foo: 'bar'});
+            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+                return $.Deferred()
+                    .resolve(new Model({id: 1, foo: 'bar'}))
+                    .promise();
+            });
+            model.save();
+            ajax.andCallFake(function (req) {
+                return $.Deferred()
+                    .resolve(new Model({id: 1, foo: 'bar', bar: 'foo'}))
+                    .promise();
+            });
+            model.save({bar: 'foo'});
+            expect(model.get('bar')).toEqual('foo');
+            expect(burry.get('1')).toEqual({id: 1, foo: 'bar', bar: 'foo'});
+        });
+
+
+
     });
 
 })(this.jQuery, this.Backbone, this.Burry);
