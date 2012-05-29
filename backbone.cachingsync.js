@@ -35,7 +35,24 @@
         }
 
         function getItems (collection, options) {
+            var ids = burry.get('__ids__'),
+                d = $.Deferred(),
+                wp;
 
+            wp = wrapped('read', collection, options);
+            wp.done(function (models) {
+                _.each(models, function (model) { burry.set(model.id, model); });
+                burry.set('__ids__', _.pluck(models, 'id'));
+                collection.reset(models);
+            });
+
+            if (typeof ids !== 'undefined') {
+                d.resolve(_.map(ids, function (id) { burry.get(id); }));
+            } else {
+                wp.done(d.resolve).fail(d.reject);
+            }
+
+            return d.promise();
         }
 
         function create (model, options) {
@@ -55,7 +72,7 @@
 
             options = options || {};
             switch (method) {
-                case 'read': p = typeof model.id !== 'undefined' ? getItem(model, options) : getItems(collection, options); break;
+                case 'read': p = typeof model.id !== 'undefined' ? getItem(model, options) : getItems(model, options); break;
                 case 'create':  p = create(model); break;
                 case 'update':  p = update(model); break;
                 case 'delete':  p = destroy(model); break;

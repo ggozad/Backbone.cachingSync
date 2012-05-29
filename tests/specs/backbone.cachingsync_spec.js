@@ -9,6 +9,12 @@
             sync: Backbone.cachingSync(Backbone.sync, 'testing')
         });
 
+        var Collection = Backbone.Collection.extend({
+            url: '/testing/mycollection',
+            model: Model,
+            sync: Backbone.cachingSync(Backbone.sync, 'testing')
+        });
+
         beforeEach(function () {
             burry = new Burry.Store('testing');
         });
@@ -42,6 +48,24 @@
             expect(ajax).toHaveBeenCalled();
             expect(model.attributes).toEqual({id: 'mymodel', foo: 'bar'});
         });
+
+        it('caches a read on a collection', function () {
+
+            // In the beginning, we have no cache.
+            collection = new Collection();
+            ajax = spyOn($, 'ajax').andCallFake(function () {
+                return $.Deferred()
+                    .resolve([{id: 1, foo: 'bar'}, {id: 2, bar: 'foo'}])
+                    .promise();
+            });
+            p = collection.fetch();
+            expect(p.isResolved()).toBeTruthy();
+            expect(ajax).toHaveBeenCalled();
+            expect(collection.models[0].attributes).toEqual({id: 1, foo: 'bar'});
+            expect(collection.models[1].attributes).toEqual({id: 2, bar: 'foo'});
+            expect(burry.get('__ids__')).toEqual([1, 2]);
+
+       });
 
     });
 
