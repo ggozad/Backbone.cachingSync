@@ -138,7 +138,19 @@
             expect(burry.get('1')).toBeUndefined();
         });
 
-
+        it('can use a Burry store with a default ttl', function () {
+            var store;
+            model = new Model({foo: 'bar'});
+            model.sync = Backbone.cachingSync(Backbone.sync, 'testingttl', 10);
+            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+                return $.Deferred()
+                    .resolve(new Model({id: 1, foo: 'bar'}))
+                    .promise();
+            });
+            model.save();
+            store = new Burry.Store('testingttl');
+            expect(_.keys(store.expirableKeys())).toEqual(["1"]);
+        });
 
     });
 

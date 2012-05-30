@@ -6,9 +6,9 @@
 
 (function ($, _, Backbone, Burry) {
 
-    Backbone.cachingSync = function (wrapped, ns) {
+    Backbone.cachingSync = function (wrapped, ns, default_ttl) {
 
-        var burry = new Burry.Store(ns);
+        var burry = new Burry.Store(ns, default_ttl);
 
         function getItem (model, options) {
             var item = burry.get(model.id),

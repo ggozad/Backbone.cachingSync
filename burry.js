@@ -20,7 +20,7 @@
     // Construct a new Burry store with an optional `namespace`.
     var Burry = {
 
-        Store: function (ns) {
+        Store: function (ns, default_ttl) {
             var stores = Burry.stores();
             if (ns) {
                 this._CACHE_SUFFIX = this._CACHE_SUFFIX + ns;
@@ -29,6 +29,7 @@
                     stores.push(ns);
             }
             localStorage.setItem('_burry_stores_', JSON.stringify(stores));
+            this.default_ttl = default_ttl;
         },
 
         // time resolution in minutes
@@ -158,12 +159,13 @@
         // Sets a `key`/`value` on the cache. Optionally, sets the expiration in `ttl` minutes.
         set: function (key, value, ttl) {
             var i, bkey, expires = {};
+            ttl = ttl || this.default_ttl;
+            if (ttl) ttl = parseInt(ttl, 10);
             if (typeof key === undefined || typeof value === undefined) return;
             value = JSON.stringify(value);
             try {
                 localStorage.setItem(this._internalKey(key), value);
                 if (ttl) {
-                    ttl = parseInt(ttl, 10);
                     localStorage.setItem(this._expirationKey(key), Burry._mEpoch() + ttl);
                 } else {
                     localStorage.removeItem(this._expirationKey(key));
@@ -175,7 +177,6 @@
                     try {
                         localStorage.setItem(this._internalKey(key), value);
                         if (ttl) {
-                            ttl = parseInt(ttl, 10);
                             localStorage.setItem(this._expirationKey(key), Burry._mEpoch() + ttl);
                         } else {
                             localStorage.removeItem(this._expirationKey(key));
