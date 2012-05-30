@@ -1,10 +1,10 @@
-//    this.js Storage v0.1
+//    Burry.js Storage v0.1
 
 //    (c) 2012 Yiorgis Gozadinos, Riot AS.
-//    this.js is distributed under the MIT license.
+//    Burry.js is distributed under the MIT license.
 //    http://github.com/ggozad/burry.js
 
-
+// AMD/global registrations
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
@@ -17,7 +17,7 @@
     }
 }(this, function () {
 
-    // Construct a new Burry store with an optional `namespace`.
+    // Construct a new Burry store with an optional `namespace` and an optional default `ttl`.
     var Burry = {
 
         Store: function (ns, default_ttl) {
@@ -32,7 +32,7 @@
             this.default_ttl = default_ttl;
         },
 
-        // time resolution in minutes
+        // Time resolution in minutes
         _EXPIRY_UNITS: 60 * 1000,
 
         // Calculate the time since Epoch in minutes
@@ -88,12 +88,13 @@
     };
 
     // Instance methods
+
     Burry.Store.prototype = {
 
-        // Constants:
         // Suffix to all keys in the cache
         _CACHE_SUFFIX: '-_burry_',
-        // key used to store expiration data
+
+        // Key used to store expiration data
         _EXPIRY_KEY: '-_burry_exp_',
 
         // Return the internally used suffixed key.
@@ -208,8 +209,6 @@
             localStorage.removeItem(this._internalKey(key));
             localStorage.removeItem(this._expirationKey(key));
         },
-
-        // Counters
 
         // Increments the integer value of `key` by 1
         incr: function (key) {
