@@ -72,13 +72,19 @@
         }
 
         function update (model, options) {
+            var old = burry.get(model.id);
             burry.set(model.id, model.attributes);
-            return wrapped('update', model, options).promise();
+            return wrapped('update', model, options)
+                .fail(function () { if (old) burry.set(model.id, old); })
+                .promise();
         }
 
         function destroy (model, options) {
+            var old = burry.get(model.id);
             burry.remove(model.id);
-            return wrapped('update', model, options).promise();
+            return wrapped('destroy', model, options)
+                .fail(function () { if (old) burry.set(model.id, old); })
+                .promise();
         }
 
         return function (method, model, options) {
@@ -97,7 +103,6 @@
             if (options.error) p.fail(options.error);
 
             return p;
-
         };
     };
 
