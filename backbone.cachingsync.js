@@ -6,11 +6,23 @@
 
 (function ($, _, Backbone, Burry) {
 
+    // **Backbone.cachingSync** provides `localStorage` caching for your models/collections.
+    // In order to use it assign your model/collection's **sync** function to a wrapped
+    // version. For instance `Collection.sync = Backbone.cachingSync(Backbone.sync, 'mycollection');`
+    // will cache sync operations in the `mycollection` localStorage store.
+    // Parameters are: `wrapped` the original sync function you are wrapping,
+    // `ns`, the namespace you want your Store to have,
+    // `default_ttl`, a default time-to-live for the cache in minutes.
     Backbone.cachingSync = function (wrapped, ns, default_ttl) {
 
+        // Create the `Burry.Store`
         var burry = new Burry.Store(ns, default_ttl);
 
-        function getItem (model, options) {
+        // **get** caches *read* operations on a model. If the model is cached,
+        // it will resolve immediately with the updated attributes, triggering a `change`
+        // event when the server *read* gets resolved. If no cache exists, the operation resolves
+        // normally (i.e. when the server *read* resolves).
+        function get (model, options) {
             var item = burry.get(model.id),
                 d = $.Deferred(),
                 updated = {},
@@ -33,7 +45,8 @@
             return d.promise();
         }
 
-        function getItems (collection, options) {
+        // **gets** behaves similarly to **get** except it applies to collections.
+        function gets (collection, options) {
             var ids = burry.get('__ids__'),
                 d = $.Deferred(),
                 wp;
@@ -57,8 +70,10 @@
             return d.promise();
         }
 
+        // **create** saves a model on the server, and when the server save is resolved,
+        // the model (and potentially its collection) is cached.
         function create (model, options) {
-            var wp = wrapped('create', model, options)
+            return wrapped('create', model, options)
                 .done(function (newmodel) {
                     burry.set(newmodel.id, newmodel.attributes);
                     if (model.collection)
@@ -67,18 +82,27 @@
                             .union([newmodel.id])
                             .without(undefined).value());
 
-                });
-            return wp.promise();
+                }).promise();
         }
 
+        // **update** resolves immediately by caching the model. Additionally it calls the wrapped sync
+        // to perform a server-side save, which if it fails reverts the cache.
         function update (model, options) {
             var old = burry.get(model.id);
             burry.set(model.id, model.attributes);
             return wrapped('update', model, options)
-                .fail(function () { if (old) burry.set(model.id, old); })
+                .fail(function () {
+                    if (old) {
+                        burry.set(model.id, old);
+                    } else {
+                        burry.remove(model.id);
+                    }
+                })
                 .promise();
         }
 
+        // **destroy** removes immediately the model from the cache. Additionally it calls the wrapped sync
+        // to perform a server-side delete, which if it fails reverts the cache.
         function destroy (model, options) {
             var old = burry.get(model.id);
             burry.remove(model.id);
@@ -87,12 +111,13 @@
                 .promise();
         }
 
+        // The actual wrapping sync function
         return function (method, model, options) {
             var p;
 
             options = options || {};
             switch (method) {
-                case 'read': p = typeof model.id !== 'undefined' ? getItem(model, options) : getItems(model, options); break;
+                case 'read':    p = typeof model.id !== 'undefined' ? get(model, options) : gets(model, options); break;
                 case 'create':  p = create(model, options); break;
                 case 'update':  p = update(model, options); break;
                 case 'delete':  p = destroy(model, options); break;

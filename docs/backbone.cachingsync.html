@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>backbone.cachingsync.js</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id="background"></div>
+<div id='container'>
+  <div class='section'>
+    <div class='docs'><h1>backbone.cachingsync.js</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>Backbone.cachingSync v0.1</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>(c) 2012 Yiorgis Gozadinos, Riot AS.
+   Backbone.cachingSync is distributed under the MIT license.
+   http://github.com/ggozad/Backbone.cachingSync</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">$</span><span class="p">,</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">Backbone</span><span class="p">,</span> <span class="nx">Burry</span><span class="p">)</span> <span class="p">{</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p><strong>Backbone.cachingSync</strong> provides <code>localStorage</code> caching for your models/collections.
+In order to use it assign your model/collection's <strong>sync</strong> function to a wrapped
+version. For instance <code>Collection.sync = Backbone.cachingSync(Backbone.sync, 'mycollection');</code>
+will cache sync operations in the <code>mycollection</code> localStorage store.
+Parameters are: <code>wrapped</code> the original sync function you are wrapping,
+<code>ns</code>, the namespace you want your Store to have,
+<code>default_ttl</code>, a default time-to-live for the cache in minutes.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nx">Backbone</span><span class="p">.</span><span class="nx">cachingSync</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">wrapped</span><span class="p">,</span> <span class="nx">ns</span><span class="p">,</span> <span class="nx">default_ttl</span><span class="p">)</span> <span class="p">{</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Create the <code>Burry.Store</code></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kd">var</span> <span class="nx">burry</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Burry</span><span class="p">.</span><span class="nx">Store</span><span class="p">(</span><span class="nx">ns</span><span class="p">,</span> <span class="nx">default_ttl</span><span class="p">);</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p><strong>get</strong> caches <em>read</em> operations on a model. If the model is cached,
+it will resolve immediately with the updated attributes, triggering a <code>change</code>
+event when the server <em>read</em> gets resolved. If no cache exists, the operation resolves
+normally (i.e. when the server <em>read</em> resolves).</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">get</span> <span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">burry</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">),</span>
+                <span class="nx">d</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">Deferred</span><span class="p">(),</span>
+                <span class="nx">updated</span> <span class="o">=</span> <span class="p">{},</span>
+                <span class="nx">wp</span><span class="p">;</span>
+
+            <span class="nx">wp</span> <span class="o">=</span> <span class="nx">wrapped</span><span class="p">(</span><span class="s1">&#39;read&#39;</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">).</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">attrs</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">model</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">attrs</span><span class="p">);</span>
+                <span class="nx">burry</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">model</span><span class="p">.</span><span class="nx">toJSON</span><span class="p">());</span>
+            <span class="p">});</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">item</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">item</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="o">!==</span> <span class="nx">value</span><span class="p">)</span> <span class="nx">updated</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+                <span class="p">});</span>
+                <span class="nx">d</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">updated</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">wp</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">resolve</span><span class="p">).</span><span class="nx">fail</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">reject</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="nx">d</span><span class="p">.</span><span class="nx">promise</span><span class="p">();</span>
+        <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p><strong>gets</strong> behaves similarly to <strong>get</strong> except it applies to collections.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">gets</span> <span class="p">(</span><span class="nx">collection</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">ids</span> <span class="o">=</span> <span class="nx">burry</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;__ids__&#39;</span><span class="p">),</span>
+                <span class="nx">d</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">Deferred</span><span class="p">(),</span>
+                <span class="nx">wp</span><span class="p">;</span>
+
+            <span class="nx">wp</span> <span class="o">=</span> <span class="nx">wrapped</span><span class="p">(</span><span class="s1">&#39;read&#39;</span><span class="p">,</span> <span class="nx">collection</span><span class="p">,</span> <span class="nx">options</span><span class="p">).</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">models</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">_</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">models</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">model</span><span class="p">)</span> <span class="p">{</span> <span class="nx">burry</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">model</span><span class="p">);</span> <span class="p">});</span>
+                <span class="nx">burry</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;__ids__&#39;</span><span class="p">,</span> <span class="nx">_</span><span class="p">.</span><span class="nx">pluck</span><span class="p">(</span><span class="nx">models</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">));</span>
+                <span class="nx">collection</span><span class="p">.</span><span class="nx">reset</span><span class="p">(</span><span class="nx">models</span><span class="p">);</span>
+            <span class="p">});</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">ids</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">d</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">ids</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">json</span> <span class="o">=</span> <span class="nx">burry</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">id</span><span class="p">);</span>
+                    <span class="nx">json</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">id</span><span class="p">;</span>
+                    <span class="k">return</span> <span class="nx">json</span><span class="p">;</span>
+                <span class="p">}));</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">wp</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">resolve</span><span class="p">).</span><span class="nx">fail</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">reject</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="nx">d</span><span class="p">.</span><span class="nx">promise</span><span class="p">();</span>
+        <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p><strong>create</strong> saves a model on the server, and when the server save is resolved,
+the model (and potentially its collection) is cached.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">create</span> <span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">wrapped</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>
+                <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">newmodel</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">burry</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">newmodel</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">newmodel</span><span class="p">.</span><span class="nx">attributes</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">collection</span><span class="p">)</span>
+                        <span class="nx">burry</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;__ids__&#39;</span><span class="p">,</span> <span class="nx">_</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">models</span><span class="p">).</span><span class="nx">chain</span><span class="p">()</span>
+                            <span class="p">.</span><span class="nx">pluck</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span>
+                            <span class="p">.</span><span class="nx">union</span><span class="p">([</span><span class="nx">newmodel</span><span class="p">.</span><span class="nx">id</span><span class="p">])</span>
+                            <span class="p">.</span><span class="nx">without</span><span class="p">(</span><span class="kc">undefined</span><span class="p">).</span><span class="nx">value</span><span class="p">());</span>
+
+                <span class="p">}).</span><span class="nx">promise</span><span class="p">();</span>
+        <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p><strong>update</strong> resolves immediately by caching the model. Additionally it calls the wrapped sync
+to perform a server-side save, which if it fails reverts the cache.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">update</span> <span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">old</span> <span class="o">=</span> <span class="nx">burry</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+            <span class="nx">burry</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">model</span><span class="p">.</span><span class="nx">attributes</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">wrapped</span><span class="p">(</span><span class="s1">&#39;update&#39;</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>
+                <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">old</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">burry</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">old</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="nx">burry</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">})</span>
+                <span class="p">.</span><span class="nx">promise</span><span class="p">();</span>
+        <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p><strong>destroy</strong> removes immediately the model from the cache. Additionally it calls the wrapped sync
+to perform a server-side delete, which if it fails reverts the cache.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kd">function</span> <span class="nx">destroy</span> <span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">old</span> <span class="o">=</span> <span class="nx">burry</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+            <span class="nx">burry</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">wrapped</span><span class="p">(</span><span class="s1">&#39;destroy&#39;</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>
+                <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">if</span> <span class="p">(</span><span class="nx">old</span><span class="p">)</span> <span class="nx">burry</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">old</span><span class="p">);</span> <span class="p">})</span>
+                <span class="p">.</span><span class="nx">promise</span><span class="p">();</span>
+        <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>The actual wrapping sync function</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">method</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">p</span><span class="p">;</span>
+
+            <span class="nx">options</span> <span class="o">=</span> <span class="nx">options</span> <span class="o">||</span> <span class="p">{};</span>
+            <span class="k">switch</span> <span class="p">(</span><span class="nx">method</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">case</span> <span class="s1">&#39;read&#39;</span><span class="o">:</span>    <span class="nx">p</span> <span class="o">=</span> <span class="k">typeof</span> <span class="nx">model</span><span class="p">.</span><span class="nx">id</span> <span class="o">!==</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">?</span> <span class="nx">get</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="o">:</span> <span class="nx">gets</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="s1">&#39;create&#39;</span><span class="o">:</span>  <span class="nx">p</span> <span class="o">=</span> <span class="nx">create</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="s1">&#39;update&#39;</span><span class="o">:</span>  <span class="nx">p</span> <span class="o">=</span> <span class="nx">update</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="s1">&#39;delete&#39;</span><span class="o">:</span>  <span class="nx">p</span> <span class="o">=</span> <span class="nx">destroy</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span> <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Fallback for old-style callbacks.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span> <span class="nx">p</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">success</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">error</span><span class="p">)</span> <span class="nx">p</span><span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">error</span><span class="p">);</span>
+
+            <span class="k">return</span> <span class="nx">p</span><span class="p">;</span>
+        <span class="p">};</span>
+    <span class="p">};</span>
+
+
+<span class="p">})(</span><span class="k">this</span><span class="p">.</span><span class="nx">jQuery</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">_</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">Backbone</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">Burry</span><span class="p">);</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
