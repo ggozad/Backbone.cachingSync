@@ -4,7 +4,18 @@
 //    Backbone.cachingSync is distributed under the MIT license.
 //    http://github.com/ggozad/Backbone.cachingSync
 
-(function ($, _, Backbone, Burry) {
+// AMD/global registrations
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['jquery', 'underscore', 'backbone', 'burry'], function ($, _, Backbone, Burry) {
+            return (root.Backbone.cachingSync = factory());
+        });
+    } else {
+        // Browser globals
+        root.Backbone.cachingSync = factory(root.$, root._, root.Backbone, root.Burry);
+    }
+}(this, function ($, _, Backbone, Burry) {
 
     // **Backbone.cachingSync** provides `localStorage` caching for your models/collections.
     // In order to use it assign your model/collection's **sync** function to a wrapped
@@ -132,4 +143,4 @@
     };
 
 
-})(this.jQuery, this._, this.Backbone, this.Burry);
+}));
