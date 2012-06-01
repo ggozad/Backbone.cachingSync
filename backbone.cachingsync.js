@@ -9,7 +9,7 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(['jquery', 'underscore', 'backbone', 'burry'], function ($, _, Backbone, Burry) {
-            return (root.Backbone.cachingSync = factory());
+            return (root.Backbone.cachingSync = factory($, _, Backbone, Burry));
         });
     } else {
         // Browser globals
@@ -24,7 +24,7 @@
     // Parameters are: `wrapped` the original sync function you are wrapping,
     // `ns`, the namespace you want your Store to have,
     // `default_ttl`, a default time-to-live for the cache in minutes.
-    Backbone.cachingSync = function (wrapped, ns, default_ttl) {
+    var cachingSync = function (wrapped, ns, default_ttl) {
 
         // Create the `Burry.Store`
         var burry = new Burry.Store(ns, default_ttl);
@@ -125,7 +125,6 @@
         // The actual wrapping sync function
         return function (method, model, options) {
             var p;
-
             options = options || {};
             switch (method) {
                 case 'read':    p = typeof model.id !== 'undefined' ? get(model, options) : gets(model, options); break;
@@ -141,6 +140,8 @@
             return p;
         };
     };
+
+    return cachingSync;
 
 
 }));
