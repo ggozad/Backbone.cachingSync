@@ -4,7 +4,18 @@
 //    Backbone.cachingSync is distributed under the MIT license.
 //    http://github.com/ggozad/Backbone.cachingSync
 
-(function ($, _, Backbone, Burry) {
+// AMD/global registrations
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['jquery', 'underscore', 'backbone', 'burry'], function ($, _, Backbone, Burry) {
+            return (root.Backbone.cachingSync = factory($, _, Backbone, Burry));
+        });
+    } else {
+        // Browser globals
+        root.Backbone.cachingSync = factory(root.$, root._, root.Backbone, root.Burry);
+    }
+}(this, function ($, _, Backbone, Burry) {
 
     // **Backbone.cachingSync** provides `localStorage` caching for your models/collections.
     // In order to use it assign your model/collection's **sync** function to a wrapped
@@ -13,7 +24,7 @@
     // Parameters are: `wrapped` the original sync function you are wrapping,
     // `ns`, the namespace you want your Store to have,
     // `default_ttl`, a default time-to-live for the cache in minutes.
-    Backbone.cachingSync = function (wrapped, ns, default_ttl) {
+    var cachingSync = function (wrapped, ns, default_ttl) {
 
         // Create the `Burry.Store`
         var burry = new Burry.Store(ns, default_ttl);
@@ -114,7 +125,6 @@
         // The actual wrapping sync function
         return function (method, model, options) {
             var p;
-
             options = options || {};
             switch (method) {
                 case 'read':    p = typeof model.id !== 'undefined' ? get(model, options) : gets(model, options); break;
@@ -131,5 +141,7 @@
         };
     };
 
+    return cachingSync;
 
-})(this.jQuery, this._, this.Backbone, this.Burry);
+
+}));

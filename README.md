@@ -33,6 +33,24 @@ Backbone.cachingSync behaves as follows for the CRUD sync operations:
 * On `update` it will immediately update the cache and resolve when the server-side resolves. If the server-side update fails it will revert the cache.
 * On `delete` it will immediately remove the model from the cache and resolve when the server-side resolves. If the server-side deletion fails it will restore the model in the cache.
 
+## AMD-loading
+
+Backbone.cachingSync supports AMD loaders such as [require.js]. Since Underscore and Backbone do not have built-in support for AMD, you will need to provide a `shim`. For instance in your `require.config` you should have:
+
+```javascript
+shim: {
+    backbone: {
+        deps: ['underscore', 'jquery'],
+        exports: "Backbone"
+    },
+
+    underscore: {
+        exports: '_'
+    },
+    ...
+}
+```
+
 ## Dependencies
 
 Backbone.cachingSync depends on [burry.js], a memcache-like localStorage cache, and jQuery.
@@ -43,4 +61,5 @@ Backbone.cachingSync is Copyright (C) 2012 Yiorgis Gozadinos, Riot AS.
 It is distributed under the MIT license.
 
 [Backbone]: http://documentcloud.github.com/backbone
+[require.js]: http://requirejs.org/
 [burry.js]: http://github.com/ggozad/burry.js
