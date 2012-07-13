@@ -57,7 +57,7 @@ Backbone.cachingSync depends on [burry.js], a memcache-like localStorage cache, 
 
 ## License
 
-Backbone.cachingSync is Copyright (C) 2012 Yiorgis Gozadinos, Riot AS.
+Backbone.cachingSync is Copyright (C) 2012 Yiorgis Gozadinos.
 It is distributed under the MIT license.
 
 [Backbone]: http://documentcloud.github.com/backbone
