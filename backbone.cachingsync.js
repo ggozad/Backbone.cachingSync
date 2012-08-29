@@ -68,12 +68,9 @@
                 collection.reset(models);
             });
 
-            if (typeof ids !== 'undefined') {
+            if (!_.isUndefined(ids) && !_.isNull(ids[0])) {
                 d.resolve(_.map(ids, function (id) {
                     json = burry.get(id);
-                    if (json === 'undefined') {
-                        return;
-                    }
                     json.id = id;
                     return json;
                 }));
