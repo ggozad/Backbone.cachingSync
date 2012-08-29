@@ -71,6 +71,9 @@
             if (typeof ids !== 'undefined') {
                 d.resolve(_.map(ids, function (id) {
                     json = burry.get(id);
+                    if (json === 'undefined') {
+                        return;
+                    }
                     json.id = id;
                     return json;
                 }));
