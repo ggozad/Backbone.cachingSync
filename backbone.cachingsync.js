@@ -1,6 +1,6 @@
-//    Backbone.cachingSync v0.1
+//    Backbone.cachingSync v0.1.0
 
-//    (c) 2012 Yiorgis Gozadinos.
+//    (c) 2012 Yiorgis Gozadinos, Crypho AS.
 //    Backbone.cachingSync is distributed under the MIT license.
 //    http://github.com/ggozad/Backbone.cachingSync
 
