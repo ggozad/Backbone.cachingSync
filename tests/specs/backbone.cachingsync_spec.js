@@ -75,6 +75,16 @@
             expect(ajax).toHaveBeenCalled();
             expect(collection2.models[0].attributes).toEqual({id: 1, foo: 'bar'});
             expect(collection2.models[1].attributes).toEqual({id: 2, bar: 'foo'});
+
+            // Make sure fetch respects the add=true option.
+            ajax.andCallFake(function () {
+                return $.Deferred()
+                    .resolve([{id: 1, foo: 'bar'}, {id: 2, bar: 'foo'}])
+                    .promise();
+            });
+            collection = new Collection([{id: 3, foobar: 'foobar'}]);
+            collection.fetch({add: true});
+
         });
 
         it('caches a create on a model', function () {
