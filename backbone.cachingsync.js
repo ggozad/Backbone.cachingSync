@@ -65,7 +65,9 @@
             wp = wrapped('read', collection, options).done(function (models) {
                 _.each(models, function (model) { burry.set(model.id, model); });
                 burry.set('__ids__', _.pluck(models, 'id'));
-                collection.reset(models);
+                if (!options.add) {
+                    collection.reset(models);
+                }
             });
 
             if (typeof ids !== 'undefined') {
