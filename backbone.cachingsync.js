@@ -66,7 +66,7 @@
                 _.each(models, function (model) { burry.set(model.id, model); });
                 burry.set('__ids__', _.pluck(models, 'id'));
                 if (!options.add) {
-                  collection.reset(models);   
+                    collection.reset(models);
                 }
             });
 
