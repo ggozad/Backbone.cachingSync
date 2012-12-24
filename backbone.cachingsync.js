@@ -64,9 +64,21 @@
 
             wp = wrapped('read', collection, options).done(function (models) {
                 _.each(models, function (model) { burry.set(model.id, model); });
-                burry.set('__ids__', _.pluck(models, 'id'));
-                if (!options.add) {
-                    collection.reset(models);
+                // Implementing collections can optionally append new model ids
+                // to the cache instead of rewriting this set each time.
+                if (options.cache_append) {
+                  ids = _.union(ids, _.pluck(models, 'id'));
+                  burry.set('__ids__', ids);
+                }
+                else {
+                  burry.set('__ids__', _.pluck(models, 'id'));
+                }
+                // Respect the fetch "update" option.
+                if (options.update) {
+                  collection.update(models, options)
+                }
+                else {
+                  collection.reset(models, options)
                 }
             });
 
