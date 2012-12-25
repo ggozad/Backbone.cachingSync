@@ -61,6 +61,9 @@
             var ids = burry.get('__ids__'),
                 d = $.Deferred(),
                 wp;
+                
+            // Filter out any nulls which creep in.
+            ids = _.filter(ids, function(id) { return !_.isNull(id) });
 
             wp = wrapped('read', collection, options).done(function (models) {
                 _.each(models, function (model) { burry.set(model.id, model); });
