@@ -160,6 +160,11 @@
             if (options.success) p.done(options.success);
             if (options.error) p.fail(options.error);
 
+            // In order to distinguish in our fetch success callback between response
+            // from the server and cache, now that the cache callback has returned,
+            // set on options that the next response is from the server.
+            options.fromServer = true;
+
             return p;
         };
     };
