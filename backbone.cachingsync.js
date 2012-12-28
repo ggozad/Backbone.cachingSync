@@ -144,6 +144,10 @@
         // The actual wrapping sync function
         return function (method, model, options) {
             var p;
+
+            // Give access to the cache on the implementing collection.
+            this.burry = burry;
+
             options = options || {};
             switch (method) {
                 case 'read':    p = typeof model.id !== 'undefined' ? get(model, options) : gets(model, options); break;
