@@ -24,7 +24,7 @@
     // Parameters are: `wrapped` the original sync function you are wrapping,
     // `ns`, the namespace you want your Store to have,
     // `default_ttl`, a default time-to-live for the cache in minutes.
-    var cachingSync = function (wrapped, ns, default_ttl) {
+    var cachingSync = function (wrapped, ns, default_ttl, maintain_own_ids) {
 
         // Create the `Burry.Store`
         var burry = new Burry.Store(ns, default_ttl);
@@ -61,15 +61,24 @@
             var ids = burry.get('__ids__'),
                 d = $.Deferred(),
                 wp;
-                
-            // Filter out any nulls which creep in.
-            ids = _.filter(ids, function(id) { return !_.isNull(id) });
 
             wp = wrapped('read', collection, options).done(function (models) {
+                options.fromServer = true;
                 _.each(models, function (model) { burry.set(model.id, model); });
-                burry.set('__ids__', _.pluck(models, 'id'));
-                if (!options.add) {
-                    collection.reset(models);
+
+                if (!maintain_own_ids) {
+                  burry.set('__ids__', _.pluck(models, 'id'));
+                }
+                else {
+                  collection.trigger('set_cache_ids');
+                }
+
+                // Respect the fetch "update" option.
+                if (options.update) {
+                  collection.update(models, options);
+                }
+                else {
+                  collection.reset(models, options);
                 }
             });
 
@@ -90,13 +99,18 @@
         // the model (and potentially its collection) is cached.
         function create (model, options) {
             return wrapped('create', model, options)
-                .done(function (newmodel) {
-                    burry.set(newmodel.id, newmodel.attributes);
+                .done(function () {
+                    burry.set(model.id, model.attributes);
                     if (model.collection)
-                        burry.set('__ids__', _(model.collection.models).chain()
-                            .pluck('id')
-                            .union([newmodel.id])
-                            .without(undefined).value());
+                        if (!maintain_own_ids) {
+                          burry.set('__ids__', _(model.collection.models).chain()
+                              .pluck('id')
+                              .union([model.id])
+                              .without(undefined).value());
+                        }
+                        else {
+                          model.collection.trigger('set_cache_ids');
+                        }
 
                 }).promise();
         }
