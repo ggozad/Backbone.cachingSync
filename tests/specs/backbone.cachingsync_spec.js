@@ -33,7 +33,7 @@
                     .promise();
             });
             p = model.fetch();
-            expect(p.isResolved()).toBeTruthy();
+            expect(p.state()).toEqual('resolved');
             expect(ajax).toHaveBeenCalled();
             expect(model.attributes).toEqual({id: 'mymodel', foo: 'bar'});
             expect(burry.get(model.id)).toEqual({id: 'mymodel', foo: 'bar'});
@@ -44,7 +44,7 @@
                 return $.Deferred().reject();
             });
             p = model2.fetch();
-            expect(p.isResolved()).toBeTruthy();
+            expect(p.state()).toEqual('resolved');
             expect(ajax).toHaveBeenCalled();
             expect(model.attributes).toEqual({id: 'mymodel', foo: 'bar'});
         });
@@ -59,7 +59,7 @@
                     .promise();
             });
             p = collection.fetch();
-            expect(p.isResolved()).toBeTruthy();
+            expect(p.state()).toEqual('resolved');
             expect(ajax).toHaveBeenCalled();
             expect(collection.models[0].attributes).toEqual({id: 1, foo: 'bar'});
             expect(collection.models[1].attributes).toEqual({id: 2, bar: 'foo'});
@@ -71,7 +71,7 @@
                 return $.Deferred().reject();
             });
             p = collection2.fetch();
-            expect(p.isResolved()).toBeTruthy();
+            expect(p.state()).toEqual('resolved');
             expect(ajax).toHaveBeenCalled();
             expect(collection2.models[0].attributes).toEqual({id: 1, foo: 'bar'});
             expect(collection2.models[1].attributes).toEqual({id: 2, bar: 'foo'});
