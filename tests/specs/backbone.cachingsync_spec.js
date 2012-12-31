@@ -116,18 +116,20 @@
             model = new Model({foo: 'bar'});
             ajax = spyOn($, 'ajax').andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve(new Model({id: 1, foo: 'bar'}))
+                    .resolve({id: 1, foo: 'bar'})
                     .promise();
             });
             model.save();
             ajax.andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve(new Model({id: 1, foo: 'bar', bar: 'foo'}))
+                    .resolve({id: 1, foo: 'bar', bar: 'foo'})
                     .promise();
             });
             model.save({bar: 'foo'});
             expect(model.get('bar')).toEqual('foo');
+
             expect(burry.get('1')).toEqual({id: 1, foo: 'bar', bar: 'foo'});
+
             // Let's now fake another update with a server failure this time
             ajax.andCallFake(function (req) {
                 return $.Deferred()
