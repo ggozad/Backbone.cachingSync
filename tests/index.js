@@ -2,11 +2,12 @@
 
 (function ($) {
     $(function () {
-        var trivialReporter = new jasmine.TrivialReporter();
         var jasmineEnv = jasmine.getEnv();
-        jasmineEnv.addReporter(trivialReporter);
+        jasmineEnv.updateInterval = 1000;
+        var htmlReporter = new jasmine.HtmlReporter();
+        jasmineEnv.addReporter(htmlReporter);
         jasmineEnv.specFilter = function(spec) {
-             return trivialReporter.specFilter(spec);
+             return htmlReporter.specFilter(spec);
         };
         jasmineEnv.execute();
     });
