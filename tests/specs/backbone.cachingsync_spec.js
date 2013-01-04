@@ -75,6 +75,19 @@
             expect(ajax).toHaveBeenCalled();
             expect(collection2.models[0].attributes).toEqual({id: 1, foo: 'bar'});
             expect(collection2.models[1].attributes).toEqual({id: 2, bar: 'foo'});
+        });
+
+        it('it allows for {update: true} option in a fetch and updates without a reset', function () {
+
+            // In the beginning, we have no cache.
+            collection = new Collection();
+            ajax = spyOn($, 'ajax').andCallFake(function () {
+                return $.Deferred()
+                    .resolve([{id: 1, foo: 'bar'}, {id: 2, bar: 'foo'}])
+                    .promise();
+            });
+            p = collection.fetch();
+            expect(burry.get('__ids__')).toEqual([1, 2]);
 
             // Make sure fetch respects the add=true option.
             ajax.andCallFake(function () {
@@ -83,9 +96,11 @@
                     .promise();
             });
             collection = new Collection([{id: 3, foobar: 'foobar'}]);
-            collection.fetch({add: true});
+            collection.fetch({update: true, add: true, remove: false});
+            expect(burry.get('__ids__')).toEqual([3, 1, 2]);
 
         });
+
 
         it('caches a create on a model', function () {
             model = new Model({foo: 'bar'});
