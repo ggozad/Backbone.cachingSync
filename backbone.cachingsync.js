@@ -87,12 +87,12 @@
         // the model (and potentially its collection) is cached.
         function create (model, options) {
             return wrapped('create', model, options)
-                .done(function (newmodel) {
-                    burry.set(newmodel.id, newmodel.attributes);
+                .done(function (attrs) {
+                    burry.set(attrs[model.idAttribute], attrs);
                     if (model.collection)
                         burry.set('__ids__', _(model.collection.models).chain()
                             .pluck('id')
-                            .union([newmodel.id])
+                            .union([attrs[model.idAttribute]])
                             .without(undefined).value());
 
                 }).promise();

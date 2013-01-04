@@ -91,7 +91,7 @@
             model = new Model({foo: 'bar'});
             ajax = spyOn($, 'ajax').andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve(new Model({id: 1, foo: 'bar'}))
+                    .resolve({id: 1, foo: 'bar'})
                     .promise();
             });
             model.save();
@@ -103,7 +103,7 @@
             collection = new Collection([{id: 1, bar: 'foo'}, {foo: 'bar'}]);
             ajax = spyOn($, 'ajax').andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve(new Model({id: 2, foobar: 'barfoo'}))
+                    .resolve({id: 2, foobar: 'barfoo'})
                     .promise();
             });
             collection.create({foobar: 'barfoo'});
@@ -144,13 +144,13 @@
             model = new Model({foo: 'bar'});
             ajax = spyOn($, 'ajax').andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve(new Model({id: 1, foo: 'bar'}))
+                    .resolve({id: 1, foo: 'bar'})
                     .promise();
             });
             model.save();
             ajax.andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve(new Model({id: 1, foo: 'bar', bar: 'foo'}))
+                    .resolve({id: 1, foo: 'bar', bar: 'foo'})
                     .promise();
             });
             model.destroy();
@@ -163,7 +163,7 @@
             model.sync = Backbone.cachingSync(Backbone.sync, 'testingttl', 10);
             ajax = spyOn($, 'ajax').andCallFake(function (req) {
                 return $.Deferred()
-                    .resolve(new Model({id: 1, foo: 'bar'}))
+                    .resolve({id: 1, foo: 'bar'})
                     .promise();
             });
             model.save();
