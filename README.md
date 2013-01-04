@@ -13,9 +13,16 @@ Backbone.cachingSync does not provide a new storage. It merely caches sync opera
 In order to decorate your original sync function with caching capabilities, you simply wrap it in an instance of **Backbone.cachingSync**. So for example, assuming you had a collection `MyCollection` using the default `Backbone.sync()` you would:
 
 ```javascript
+var MyModel = Backbone.Mode.extend({
+
+    sync: Backbone.cachingSync(Backbone.sync, 'mystuff'),
+
+});
+
 var MyCollection = Backbone.Collection.extend({
 
-    sync: Backbone.cachingSync(Backbone.sync, 'mycollection'),
+    model: MyModel,
+    sync: Backbone.cachingSync(Backbone.sync, 'mystuff'),
     ...
 });
 ```
