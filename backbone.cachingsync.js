@@ -64,9 +64,12 @@
 
             wp = wrapped('read', collection, options).done(function (models) {
                 _.each(models, function (model) { burry.set(model.id, model); });
-                burry.set('__ids__', _.pluck(models, 'id'));
-                if (!options.add) {
-                    collection.reset(models);
+                // Respect the fetch "update" option.
+                if (options.update) {
+                  collection.update(models, options)
+                }
+                else {
+                  collection.reset(models, options)
                 }
             });
 
