@@ -121,7 +121,7 @@
         function destroy (model, options) {
             var old = burry.get(model.id);
             burry.remove(model.id);
-            return wrapped('destroy', model, options)
+            return wrapped('delete', model, options)
                 .fail(function () { if (old) burry.set(model.id, old); })
                 .promise();
         }
