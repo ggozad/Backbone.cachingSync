@@ -64,8 +64,8 @@
 
             wp = wrapped('read', collection, options).done(function (models) {
                 _.each(models, function (model) { burry.set(model.id, model); });
-                if (options.update) {
-                    collection.update(models, options);
+                if (options) {
+                    collection.set(models, options);
                 } else {
                     collection.reset(models);
                 }

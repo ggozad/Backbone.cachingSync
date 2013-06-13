@@ -77,7 +77,7 @@
             expect(collection2.models[1].attributes).toEqual({id: 2, bar: 'foo'});
         });
 
-        it('it allows for {update: true} option in a fetch and updates without a reset', function () {
+        it('it allows for options in a fetch and smart updates without a reset', function () {
 
             // In the beginning, we have no cache.
             collection = new Collection();
@@ -96,7 +96,7 @@
                     .promise();
             });
             collection = new Collection([{id: 3, foobar: 'foobar'}]);
-            collection.fetch({update: true, add: true, remove: false});
+            collection.fetch({add: true, remove: false});
             expect(burry.get('__ids__')).toEqual([3, 1, 2]);
 
         });
