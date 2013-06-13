@@ -1,6 +1,6 @@
-//    Burry.js Storage v0.1.2
+//    Burry.js Storage v0.1.0
 
-//    (c) 2012 Yiorgis Gozadinos.
+//    (c) 2012 Yiorgis Gozadinos, Crypho AS.
 //    Burry.js is distributed under the MIT license.
 //    http://github.com/ggozad/burry.js
 
@@ -52,26 +52,30 @@
 
         // Checks for localStorage & JSON support.
         isSupported: function () {
+            // If this has been called before we already know.
+            if (Burry._isSupported) return Burry._isSupported;
+
             try {
                 localStorage.setItem('_burry_', '_burry_');
                 localStorage.removeItem('_burry_');
             } catch (e) {
-                return false;
+                return Burry._isSupported = false;
             }
             if (!JSON) {
-                return false;
+                return Burry._isSupported = false;
             }
-            return true;
+            return Burry._isSupported = true;
         },
 
         flushExpired: function () {
             var i, match, key, val, ns,
                 remove = [],
-                now = Burry._mEpoch();
+                now = Burry._mEpoch(),
+                reKey = new RegExp('(.+)' + Burry.Store.prototype._EXPIRY_KEY + '(.*)');
 
             for (i=0; i< localStorage.length; i++) {
                 key = localStorage.key(i);
-                match = key.match(/(.+)-_burry_exp_(.*)/);
+                match = key.match(reKey);
                 if (match) {
                     val = localStorage.getItem(key);
                     if (val < now) {
