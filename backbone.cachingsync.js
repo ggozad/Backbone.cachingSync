@@ -26,10 +26,16 @@
     // `default_ttl`, a default time-to-live for the cache in minutes.
     var cachingSync = function (wrapped, ns, default_ttl, settings) {
 
-        settings = settings || { aggressiveSync: true };
+        settings = settings || {};
+        if (typeof settings.aggressiveSync === 'undefined') {
+          settings.aggressiveSync = true;
+        }
+        if (typeof settings.storage === 'undefined') {
+          settings.storage = 'localStorage';
+        }
 
         // Create the `Burry.Store`
-        var burry = new Burry.Store(ns, default_ttl);
+        var burry = new Burry.Store(ns, default_ttl, settings.storage);
 
         // **get** caches *read* operations on a model. If the model is cached,
         // it will resolve immediately with the updated attributes, triggering a `change`
