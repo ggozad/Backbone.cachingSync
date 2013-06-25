@@ -24,7 +24,9 @@
     // Parameters are: `wrapped` the original sync function you are wrapping,
     // `ns`, the namespace you want your Store to have,
     // `default_ttl`, a default time-to-live for the cache in minutes.
-    var cachingSync = function (wrapped, ns, default_ttl) {
+    var cachingSync = function (wrapped, ns, default_ttl, settings) {
+
+        settings = settings || { aggressiveSync: true };
 
         // Create the `Burry.Store`
         var burry = new Burry.Store(ns, default_ttl);
@@ -39,10 +41,12 @@
                 updated = {},
                 wp;
 
-            wp = wrapped('read', model, options).done(function (attrs) {
-                model.set(attrs);
-                burry.set(model.id, model.toJSON());
-            });
+            if (typeof item === 'undefined' || settings.aggressiveSync) {
+              wp = wrapped('read', model, options).done(function (attrs) {
+                  model.set(attrs);
+                  burry.set(model.id, model.toJSON());
+              });
+            }
 
             if (typeof item !== 'undefined') {
                 _.each(item, function (value, key) {
@@ -62,15 +66,17 @@
                 d = $.Deferred(),
                 wp;
 
-            wp = wrapped('read', collection, options).done(function (models) {
-                _.each(models, function (model) { burry.set(model.id, model); });
-                if (options) {
-                    collection.set(models, options);
-                } else {
-                    collection.reset(models);
-                }
-                burry.set('__ids__', _.pluck(collection.models, 'id'));
-            });
+            if (typeof item === 'undefined' || settings.aggressiveSync) {
+              wp = wrapped('read', collection, options).done(function (models) {
+                  _.each(models, function (model) { burry.set(model.id, model); });
+                  if (options) {
+                      collection.set(models, options);
+                  } else {
+                      collection.reset(models);
+                  }
+                  burry.set('__ids__', _.pluck(collection.models, 'id'));
+              });
+            }
 
             if (typeof ids !== 'undefined') {
                 d.resolve(_.map(ids, function (id) {
