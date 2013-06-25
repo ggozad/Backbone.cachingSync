@@ -20,15 +20,17 @@
     // Construct a new Burry store with an optional `namespace` and an optional default `ttl`.
     var Burry = {
 
-        Store: function (ns, default_ttl) {
-            var stores = Burry.stores();
+        Store: function (ns, default_ttl, storage) {
+            this.storage = Burry.resolveStorage(storage);
+            var stores = Burry.stores(this.storage);
             if (ns) {
                 this._CACHE_SUFFIX = this._CACHE_SUFFIX + ns;
                 this._EXPIRY_KEY = this._EXPIRY_KEY + ns;
                 if (stores.indexOf(ns) === -1)
                     stores.push(ns);
             }
-            localStorage.setItem('_burry_stores_', JSON.stringify(stores));
+
+            this.storage.setItem('_burry_stores_', JSON.stringify(stores));
             this.default_ttl = default_ttl;
         },
 
@@ -40,8 +42,8 @@
             return Math.floor((new Date().getTime())/Burry._EXPIRY_UNITS);
         },
 
-        stores: function () {
-            var stores = localStorage.getItem('_burry_stores_');
+        stores: function (storage) {
+            var stores = storage.getItem('_burry_stores_');
             if (stores) {
                 stores = JSON.parse(stores);
             } else {
@@ -50,34 +52,78 @@
             return stores;
         },
 
-        // Checks for localStorage & JSON support.
-        isSupported: function () {
-            // If this has been called before we already know.
-            if (Burry._isSupported) return Burry._isSupported;
+        resolveStorage: function (storage) {
+          if ((typeof storage === 'undefined' || storage === 'localStorage') && typeof localStorage !== 'undefined') {
+            storage = localStorage;
+          } else if (storage === 'sessionStorage' && typeof sessionStorage !== 'undefined') {
+            storage = sessionStorage;
+          } else if (storage === 'globalStorage' && typeof globalStorage !== 'undefined') {
+            storage = globalStorage;
+          } else if (storage === 'memory') {
+            storage = {
+              values: {},
+              keysByIndex: [],
+              length: 0,
+              key: function (index) {
+                return this.keysByIndex[index];
+              },
+              getItem: function (key) {
+                return this.values[key]
+              },
+              setItem: function (key, value) {
+                if (typeof this.values[key] === 'undefined') {
+                  this.keysByIndex.push(key);
+                  this.length++;
+                }
+                this.values[key] = value;
+              },
+              removeItem: function (key) {
+                var indexToRemove = -1;
+                if (typeof this.values[key] !== 'undefined') {
+                  indexToRemove = this.keysByIndex.indexOf(key);
+                  if (indexToRemove !== -1){
+                    this.keysByIndex.splice(indexToRemove, 1);
+                  }
+                  delete this.values[key];
+                  this.length--;
+                }
+              },
+              clear: function() {
+                this.values = {};
+                this.keysByIndex = [];
+                this.length = 0;
+              }
+            };
+          }
 
-            try {
-                localStorage.setItem('_burry_', '_burry_');
-                localStorage.removeItem('_burry_');
-            } catch (e) {
-                return Burry._isSupported = false;
-            }
-            if (!JSON) {
-                return Burry._isSupported = false;
-            }
-            return Burry._isSupported = true;
+          return storage;
         },
 
-        flushExpired: function () {
+        // Checks for storage & JSON support.
+        isSupported: function (storage) {
+            try {
+                storage.setItem('_burry_', '_burry_');
+                storage.removeItem('_burry_');
+            } catch (e) {
+                return false;
+            }
+            if (!JSON) {
+                return false;
+            }
+            return true;
+        },
+
+        flushExpired: function (storage) {
             var i, match, key, val, ns,
                 remove = [],
                 now = Burry._mEpoch(),
                 reKey = new RegExp('(.+)' + Burry.Store.prototype._EXPIRY_KEY + '(.*)');
 
-            for (i=0; i< localStorage.length; i++) {
-                key = localStorage.key(i);
+            for (i=0; i< storage.length; i++) {
+                key = storage.key(i);
                 match = key.match(reKey);
                 if (match) {
-                    val = localStorage.getItem(key);
+                    val = storage.getItem(key);
                     if (val < now) {
                         key = match[1]; ns = match[2];
                         remove.push(key + Burry.Store.prototype._CACHE_SUFFIX + ns);
@@ -86,7 +132,7 @@
                 }
             }
             for (i=0; i< remove.length; i++) {
-                localStorage.removeItem(remove[i]);
+                storage.removeItem(remove[i]);
             }
         }
     };
@@ -128,7 +174,7 @@
         // Returns in how many minutes after Epoch the key expires,
         // or `undefined` if it does not expire.
         _expiresOn: function (key) {
-            var expires = localStorage.getItem(this._expirationKey(key));
+            var expires = this.storage.getItem(this._expirationKey(key));
             if (expires) {
                 return parseInt(expires, 10);
             }
@@ -136,7 +182,7 @@
 
         // Parse the value of a key as an integer.
         _getCounter: function (bkey) {
-            var value = localStorage.getItem(bkey);
+            var value = this.storage.getItem(bkey);
             if (value === null) return 0;
 
             return parseInt(value, 10);
@@ -145,7 +191,7 @@
         // Returns the value of `key` from the cache, `undefined` if the `key` has
         // expired or is not stored.
         get: function (key) {
-            var value = localStorage.getItem(this._internalKey(key));
+            var value = this.storage.getItem(this._internalKey(key));
             if (value === null) {
                 return undefined;
             }
@@ -169,22 +215,22 @@
             if (typeof key === undefined || typeof value === undefined) return;
             value = JSON.stringify(value);
             try {
-                localStorage.setItem(this._internalKey(key), value);
+                this.storage.setItem(this._internalKey(key), value);
                 if (ttl) {
-                    localStorage.setItem(this._expirationKey(key), Burry._mEpoch() + ttl);
+                    this.storage.setItem(this._expirationKey(key), Burry._mEpoch() + ttl);
                 } else {
-                    localStorage.removeItem(this._expirationKey(key));
+                    this.storage.removeItem(this._expirationKey(key));
                 }
             } catch (e) {
-                if (e.name === 'QUOTA_EXCEEDED_ERR' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                    // No space left on localStorage, let's flush expired items and try agagin.
-                    Burry.flushExpired();
+                if (e.name === 'QUOTA_EXCEEDED_ERR' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.name === 'QuotaExceededError') {
+                    // No space left on this.storage, let's flush expired items and try agagin.
+                    Burry.flushExpired(this.storage);
                     try {
-                        localStorage.setItem(this._internalKey(key), value);
+                        this.storage.setItem(this._internalKey(key), value);
                         if (ttl) {
-                            localStorage.setItem(this._expirationKey(key), Burry._mEpoch() + ttl);
+                            this.storage.setItem(this._expirationKey(key), Burry._mEpoch() + ttl);
                         } else {
-                            localStorage.removeItem(this._expirationKey(key));
+                            this.storage.removeItem(this._expirationKey(key));
                         }
                     }
                     catch (e) {
@@ -196,22 +242,22 @@
 
         // Sets a `key`/`value` on the cache as does **set** but only if the key does not already exist or has expired.
         add: function (key, value, ttl) {
-            if (localStorage.getItem(this._internalKey(key)) === null || this.hasExpired(key)) {
+            if (this.storage.getItem(this._internalKey(key)) === null || this.hasExpired(key)) {
                 this.set(key, value, ttl);
             }
         },
 
         // Sets a `key`/`value` on the cache as does **set** but only if the key already exist and has not expired.
         replace: function (key, value, ttl) {
-            if (localStorage.getItem(this._internalKey(key)) !== null && !this.hasExpired(key)) {
+            if (this.storage.getItem(this._internalKey(key)) !== null && !this.hasExpired(key)) {
                 this.set(key, value, ttl);
             }
         },
 
         // Removes an item from the cache.
         remove: function (key) {
-            localStorage.removeItem(this._internalKey(key));
-            localStorage.removeItem(this._expirationKey(key));
+            this.storage.removeItem(this._internalKey(key));
+            this.storage.removeItem(this._expirationKey(key));
         },
 
         // Increments the integer value of `key` by 1
@@ -219,7 +265,7 @@
             var bkey = this._internalKey(key),
                 value = this._getCounter(bkey);
             value++;
-            localStorage.setItem(bkey, value);
+            this.storage.setItem(bkey, value);
         },
 
         // Decrements the integer value of `key` by 1
@@ -227,7 +273,7 @@
             var bkey = this._internalKey(key),
                 value = this._getCounter(bkey);
             value--;
-            localStorage.setItem(bkey, value);
+            this.storage.setItem(bkey, value);
         },
 
         // Returns whether `key` has expired.
@@ -242,8 +288,8 @@
         // Returns a list of all the cached keys
         keys: function () {
             var i, bkey, key, results = [];
-            for (i=0; i < localStorage.length ; i++) {
-                bkey = localStorage.key(i);
+            for (i=0; i < this.storage.length ; i++) {
+                bkey = this.storage.key(i);
                 key = this._isInternalKey(bkey);
                 if (key) {
                     results.push(key);
@@ -256,27 +302,27 @@
         // in minutes since Epoch.
         expirableKeys: function () {
             var i, bkey, key, results = {};
-            for (i=0; i < localStorage.length ; i++) {
-                bkey = localStorage.key(i);
+            for (i=0; i < this.storage.length ; i++) {
+                bkey = this.storage.key(i);
                 key = this._isExpirationKey(bkey);
                 if (key) {
-                    results[key] = parseInt(localStorage.getItem(bkey), 10);
+                    results[key] = parseInt(this.storage.getItem(bkey), 10);
                 }
             }
             return results;
         },
 
-        // Removes all Burry items from `localStorage`.
+        // Removes all Burry items from `this.storage`.
         flush: function () {
             var i, key, remove = [];
-            for (i=0; i < localStorage.length ; i++) {
-                key = localStorage.key(i);
+            for (i=0; i < this.storage.length ; i++) {
+                key = this.storage.key(i);
                 if (this._isInternalKey(key) || this._isExpirationKey(key)) {
                     remove.push(key);
                 }
             }
             for (i=0; i<remove.length; i++)
-                localStorage.removeItem(remove[i]);
+                this.storage.removeItem(remove[i]);
         },
 
         // Removes all expired items.
