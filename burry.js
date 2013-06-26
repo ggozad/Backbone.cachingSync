@@ -43,6 +43,7 @@
         },
 
         stores: function (storage) {
+            storage = storage || localStorage;
             var stores = storage.getItem('_burry_stores_');
             if (stores) {
                 stores = JSON.parse(stores);
@@ -101,6 +102,7 @@
 
         // Checks for storage & JSON support.
         isSupported: function (storage) {
+            storage = storage || localStorage;
             try {
                 storage.setItem('_burry_', '_burry_');
                 storage.removeItem('_burry_');
@@ -118,6 +120,7 @@
                 remove = [],
                 now = Burry._mEpoch(),
                 reKey = new RegExp('(.+)' + Burry.Store.prototype._EXPIRY_KEY + '(.*)');
+            storage = storage || localStorage;
 
             for (i=0; i< storage.length; i++) {
                 key = storage.key(i);
