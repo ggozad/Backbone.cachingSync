@@ -34,6 +34,12 @@
             this.default_ttl = default_ttl;
         },
 
+        MemoryStorage: function () {
+            this.values = {};
+            this.keysByIndex = [];
+            this.length = 0;
+        },
+
         // Time resolution in minutes
         _EXPIRY_UNITS: 60 * 1000,
 
@@ -54,50 +60,21 @@
         },
 
         resolveStorage: function (storage) {
-          if ((typeof storage === 'undefined' || storage === 'localStorage') && typeof localStorage !== 'undefined') {
-            storage = localStorage;
-          } else if (storage === 'sessionStorage' && typeof sessionStorage !== 'undefined') {
-            storage = sessionStorage;
-          } else if (storage === 'globalStorage' && typeof globalStorage !== 'undefined') {
-            storage = globalStorage;
-          } else if (storage === 'memory') {
-            storage = {
-              values: {},
-              keysByIndex: [],
-              length: 0,
-              key: function (index) {
-                return this.keysByIndex[index];
-              },
-              getItem: function (key) {
-                return this.values[key]
-              },
-              setItem: function (key, value) {
-                if (typeof this.values[key] === 'undefined') {
-                  this.keysByIndex.push(key);
-                  this.length++;
+            if ((typeof storage === 'undefined' || storage === 'localStorage') && typeof localStorage !== 'undefined') {
+                storage = localStorage;
+            } else if (storage === 'sessionStorage' && typeof sessionStorage !== 'undefined') {
+                storage = sessionStorage;
+            } else if (storage === 'globalStorage' && typeof globalStorage !== 'undefined') {
+                storage = globalStorage;
+            } else if (storage === 'memory') {
+                if (typeof Burry.memoryStorage === 'undefined') {
+                    Burry.memoryStorage = new Burry.MemoryStorage();
                 }
-                this.values[key] = value;
-              },
-              removeItem: function (key) {
-                var indexToRemove = -1;
-                if (typeof this.values[key] !== 'undefined') {
-                  indexToRemove = this.keysByIndex.indexOf(key);
-                  if (indexToRemove !== -1){
-                    this.keysByIndex.splice(indexToRemove, 1);
-                  }
-                  delete this.values[key];
-                  this.length--;
-                }
-              },
-              clear: function() {
-                this.values = {};
-                this.keysByIndex = [];
-                this.length = 0;
-              }
-            };
-          }
-
-          return storage;
+                storage = Burry.memoryStorage;
+            } else if (storage === 'memoryInstance') {
+                storage = new Burry.MemoryStorage();
+            }
+            return storage;
         },
 
         // Checks for storage & JSON support.
@@ -141,6 +118,43 @@
     };
 
     // Instance methods
+
+    Burry.MemoryStorage.prototype = {
+
+        key: function (index) {
+            return this.keysByIndex[index];
+        },
+
+        getItem: function (key) {
+            return this.values[key]
+        },
+
+        setItem: function (key, value) {
+            if (typeof this.values[key] === 'undefined') {
+                this.keysByIndex.push(key);
+                this.length++;
+            }
+            this.values[key] = value;
+        },
+
+        removeItem: function (key) {
+            var indexToRemove = -1;
+            if (typeof this.values[key] !== 'undefined') {
+                indexToRemove = this.keysByIndex.indexOf(key);
+                if (indexToRemove !== -1){
+                    this.keysByIndex.splice(indexToRemove, 1);
+                }
+                delete this.values[key];
+                this.length--;
+            }
+        },
+
+        clear: function() {
+            this.values = {};
+            this.keysByIndex = [];
+            this.length = 0;
+        }
+    };
 
     Burry.Store.prototype = {
 
