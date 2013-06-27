@@ -48,10 +48,10 @@
                 wp;
 
             if (typeof item === 'undefined' || settings.aggressiveSync) {
-              wp = wrapped('read', model, options).done(function (attrs) {
-                  model.set(attrs);
-                  burry.set(model.id, model.toJSON());
-              });
+                wp = wrapped('read', model, options).done(function (attrs) {
+                    model.set(attrs);
+                    burry.set(model.id, model.toJSON());
+                });
             }
 
             if (typeof item !== 'undefined') {
@@ -73,15 +73,15 @@
                 wp;
 
             if (typeof item === 'undefined' || settings.aggressiveSync) {
-              wp = wrapped('read', collection, options).done(function (models) {
-                  _.each(models, function (model) { burry.set(model.id, model); });
-                  if (options) {
-                      collection.set(models, options);
-                  } else {
-                      collection.reset(models);
-                  }
-                  burry.set('__ids__', _.pluck(collection.models, 'id'));
-              });
+                wp = wrapped('read', collection, options).done(function (models) {
+                    _.each(models, function (model) { burry.set(model.id, model); });
+                    if (options) {
+                        collection.set(models, options);
+                    } else {
+                        collection.reset(models);
+                    }
+                    burry.set('__ids__', _.pluck(collection.models, 'id'));
+                });
             }
 
             if (typeof ids !== 'undefined') {
