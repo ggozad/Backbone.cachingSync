@@ -16,7 +16,8 @@
   "dependencies": {
     "jquery": "",
     "underscore": "",
-    "backbone": ""
+    "backbone": "",
+    "burry": ""
   },
   "devDependencies": {
     "jasmine": ""
