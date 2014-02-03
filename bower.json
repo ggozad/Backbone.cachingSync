@@ -1,0 +1,31 @@
+{
+  "name": "Backbone.cachingSync",
+  "main": "Backbone.cachingSync.js",
+  "version": "1.0.0",
+  "homepage": "https://github.com/ggozad/Backbone.cachingSync",
+  "authors": [
+    "Yiorgis Gozadinos <ggozad@crypho.com>"
+  ],
+  "description": "An extension to Backbone providing localStorage caching for Backbone sync operations",
+  "keywords": [
+    "backbone",
+    "sync",
+    "caching",
+    "localStorage"
+  ],
+  "dependencies": {
+    "jquery": "",
+    "underscore": "",
+    "backbone": "",
+    "burry": ""
+  },
+  "devDependencies": {
+    "jasmine": ""
+  },
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "tests"
+  ]
+}
