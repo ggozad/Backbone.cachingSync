@@ -27,7 +27,7 @@
 
             // In the beginning, we have no cache.
             model = new Model({id: 'mymodel'});
-            ajax = spyOn($, 'ajax').andCallFake(function () {
+            ajax = spyOn($, 'ajax').and.callFake(function () {
                 return $.Deferred()
                     .resolve({foo: 'bar'})
                     .promise();
@@ -40,7 +40,7 @@
 
             // Now that we have a cache, let's create a new model with the same id and also make ajax fail
             var model2 = new Model({id: 'mymodel'});
-            ajax.andCallFake(function () {
+            ajax.and.callFake(function () {
                 return $.Deferred().reject();
             });
             p = model2.fetch();
@@ -53,7 +53,7 @@
 
             // In the beginning, we have no cache.
             collection = new Collection();
-            ajax = spyOn($, 'ajax').andCallFake(function () {
+            ajax = spyOn($, 'ajax').and.callFake(function () {
                 return $.Deferred()
                     .resolve([{id: 1, foo: 'bar'}, {id: 2, bar: 'foo'}])
                     .promise();
@@ -67,7 +67,7 @@
 
             // Now that we have a cache, let's create a new collection with the same ns and also make ajax fail
             var collection2 = new Collection();
-            ajax.andCallFake(function () {
+            ajax.and.callFake(function () {
                 return $.Deferred().reject();
             });
             p = collection2.fetch();
@@ -81,7 +81,7 @@
 
             // In the beginning, we have no cache.
             collection = new Collection();
-            ajax = spyOn($, 'ajax').andCallFake(function () {
+            ajax = spyOn($, 'ajax').and.callFake(function () {
                 return $.Deferred()
                     .resolve([{id: 1, foo: 'bar'}, {id: 2, bar: 'foo'}])
                     .promise();
@@ -90,7 +90,7 @@
             expect(burry.get('__ids__')).toEqual([1, 2]);
 
             // Make sure fetch respects the add=true option.
-            ajax.andCallFake(function () {
+            ajax.and.callFake(function () {
                 return $.Deferred()
                     .resolve([{id: 1, foo: 'bar'}, {id: 2, bar: 'foo'}])
                     .promise();
@@ -104,7 +104,7 @@
 
         it('caches a create on a model', function () {
             model = new Model({foo: 'bar'});
-            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+            ajax = spyOn($, 'ajax').and.callFake(function (req) {
                 return $.Deferred()
                     .resolve({id: 1, foo: 'bar'})
                     .promise();
@@ -116,7 +116,7 @@
 
         it('caches a create on a collection', function () {
             collection = new Collection([{id: 1, bar: 'foo'}, {foo: 'bar'}]);
-            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+            ajax = spyOn($, 'ajax').and.callFake(function (req) {
                 return $.Deferred()
                     .resolve({id: 2, foobar: 'barfoo'})
                     .promise();
@@ -129,13 +129,13 @@
 
         it('caches an update on a model', function () {
             model = new Model({foo: 'bar'});
-            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+            ajax = spyOn($, 'ajax').and.callFake(function (req) {
                 return $.Deferred()
                     .resolve({id: 1, foo: 'bar'})
                     .promise();
             });
             model.save();
-            ajax.andCallFake(function (req) {
+            ajax.and.callFake(function (req) {
                 return $.Deferred()
                     .resolve({id: 1, foo: 'bar', bar: 'foo'})
                     .promise();
@@ -146,7 +146,7 @@
             expect(burry.get('1')).toEqual({id: 1, foo: 'bar', bar: 'foo'});
 
             // Let's now fake another update with a server failure this time
-            ajax.andCallFake(function (req) {
+            ajax.and.callFake(function (req) {
                 return $.Deferred()
                     .reject()
                     .promise();
@@ -157,13 +157,13 @@
 
         it('caches a destroy on a model', function () {
             model = new Model({foo: 'bar'});
-            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+            ajax = spyOn($, 'ajax').and.callFake(function (req) {
                 return $.Deferred()
                     .resolve({id: 1, foo: 'bar'})
                     .promise();
             });
             model.save();
-            ajax.andCallFake(function (req) {
+            ajax.and.callFake(function (req) {
                 return $.Deferred()
                     .resolve({id: 1, foo: 'bar', bar: 'foo'})
                     .promise();
@@ -176,7 +176,7 @@
             var store;
             model = new Model({foo: 'bar'});
             model.sync = Backbone.cachingSync(Backbone.sync, 'testingttl', 10);
-            ajax = spyOn($, 'ajax').andCallFake(function (req) {
+            ajax = spyOn($, 'ajax').and.callFake(function (req) {
                 return $.Deferred()
                     .resolve({id: 1, foo: 'bar'})
                     .promise();
