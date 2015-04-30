@@ -13,7 +13,7 @@
         });
     } else {
         // Browser globals
-        root.Backbone.cachingSync = factory(root.$, root._, root.Backbone, root.Burry);
+        root.Backbone.cachingSync = factory(root.jQuery, root._, root.Backbone, root.Burry);
     }
 }(this, function ($, _, Backbone, Burry) {
 
