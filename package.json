@@ -1,6 +1,6 @@
 {
   "name": "Backbone.cachingSync",
-  "version": "0.1.2",
+  "version": "1.0.1",
   "author": " Yiorgis Gozadinos <ggozad@crypho.com>",
   "description": "An extension to Backbone providing localStorage caching for Backbone sync operations",
   "contributors": [

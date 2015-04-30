@@ -1,7 +1,7 @@
 {
   "name": "Backbone.cachingSync",
   "main": "Backbone.cachingSync.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/ggozad/Backbone.cachingSync",
   "authors": [
     "Yiorgis Gozadinos <ggozad@crypho.com>"
