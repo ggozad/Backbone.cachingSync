@@ -101,6 +101,46 @@
 
         });
 
+        it('allows parse after a read of a collection', function () {
+
+            // In the beginning, we have no cache.
+            collection = new Collection();
+
+            ajax = spyOn($, 'ajax').and.callFake(function () {
+                return $.Deferred()
+                    .resolve([{id: 1, foo: 'bar'}, {id: 2, bar: 'foo'}])
+                    .promise();
+            });
+            p = collection.fetch();
+
+            // make sure default behavior remains
+            expect(burry.get('__ids__')).toEqual([1, 2]);
+
+
+
+            ajax.and.callFake(function () {
+                return $.Deferred()
+                    .resolve([{id: 1, foo: 'bar'}, {id: 2, bar: 'foo'}])
+                    .promise();
+            });
+
+
+
+            collection = new Collection();
+            var parse = spyOn(collection, 'parse').and.callFake(function (resp) {
+                resp.forEach(function (itm) {
+                    itm.bar = 'foo';
+                });
+                return resp;
+            });
+            p = collection.fetch({parse: true});
+            expect(p.state()).toEqual('resolved');
+            expect(ajax).toHaveBeenCalled();
+            expect(parse).toHaveBeenCalled();
+            expect(collection.models[0].attributes.bar).toEqual('foo');
+            expect(collection.models[1].attributes.bar).toEqual('foo');
+        });
+
 
         it('caches a create on a model', function () {
             model = new Model({foo: 'bar'});

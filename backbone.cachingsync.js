@@ -63,7 +63,16 @@
                 wp;
 
             wp = wrapped('read', collection, options).done(function (models) {
-                _.each(models, function (model) { burry.set(model.id, model); });
+
+                var burryModels = models;
+
+                // If parse is activated in the options object, execute it.
+                if (options.parse) {
+                    burryModels = collection.parse(models);
+                }
+
+                _.each(burryModels, function (model) { burry.set(model.id, model); });
+
                 if (options) {
                     collection.set(models, options);
                 } else {
