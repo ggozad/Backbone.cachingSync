@@ -25,6 +25,10 @@
     // `ns`, the namespace you want your Store to have,
     // `default_ttl`, a default time-to-live for the cache in minutes.
     var cachingSync = function (wrapped, ns, default_ttl) {
+        
+        if (!Burry.isSupported()) {
+            return;
+        }
 
         // Create the `Burry.Store`
         var burry = new Burry.Store(ns, default_ttl);
