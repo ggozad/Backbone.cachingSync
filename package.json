@@ -4,8 +4,7 @@
   "author": " Yiorgis Gozadinos <ggozad@crypho.com>",
   "description": "An extension to Backbone providing localStorage caching for Backbone sync operations",
   "contributors": [
-    {
-    }
+    {}
   ],
   "repository": {
     "type": "git",
@@ -16,10 +15,15 @@
     "caching",
     "localStorage"
   ],
-  "dependencies" : {
+  "dependencies": {
     "jquery-browser": "*",
     "underscore": "*",
-    "backbone":  "*"
+    "backbone": "*"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "volo": {
+    "dependencies": {
+      "burry": "github:dborisenko/burry.js/master#burry.js"
+    }
+  }
 }
